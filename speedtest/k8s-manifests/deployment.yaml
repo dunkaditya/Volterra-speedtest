@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: speedtest-all-res
+  labels:
+    app: speedtest
+  annotations:
+    ves.io/virtual-sites: speed-test/all-res
+    ves.io/workload-flavor: medium
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: speedtest
+  template:
+    metadata:
+      labels:
+        app: speedtest
+    spec:
+      containers:
+      - image: madhukar32/libre-speedtest:with-load-debug
+        imagePullPolicy: Always
+        name: speedtest
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: config-ports
+          mountPath: /etc/apache2
+        volumeMounts:
+        - name: config-vh
+          mountPath: /etc/apache2/sites-enabled
+      volumes:
+      - name: config-ports
+        configMap:
+          name: apache-ports
+          items:
+          - key: ports.conf
+            path: ports.conf
+      - name: config-vh
+        configMap:
+          name: apache-vh
+          items:
+          - key: vh.conf
+            path: 000-default.conf
